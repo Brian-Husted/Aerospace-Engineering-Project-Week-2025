@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body style='background-color: #EEEEEE;'>
+
+<span style='color: #003366;'>
+
+<h1>Descent Testing</h1>
+<p>
+<label for='servo1start'>Servo 1 initial position(0 to 180):</label>
+<input id='servo1start' type='number' name='servo1start' value='0' min='0' max='180'/>
+<p>
+<label for='servo1final'>Servo 1 release position(0 to 180):</label>
+<input id='servo1final' type='number' name='servo1final' value='180' min='0' max='180'/>
+<p>
+<label for='servo2start'>Servo 2 initial position(0 to 180):</label>
+<input id='servo2start' type='number' name='servo2start' value='0' min='0' max='180'/>
+<p>
+<label for='servo2final'>Servo 2 release position(0 to 180):</label>
+<input id='servo2final' type='number' name='servo2final' value='180' min='0' max='180'/>
+<p>
+<p>
+<button type='button' id='BTN_INIT'>
+Initialize
+</button></p>
+
+<button type='button' id='BTN_TEST'>
+Test Release
+</button></p>
+<p>
+<button type='button' id='BTN_LAUNCH'>
+Ready for Launch!
+</button></p>
+
+</span>
+
+</body>
+<script>
+  var Socket;
+  document.getElementById('BTN_INIT').addEventListener('click', button_initilize);
+  document.getElementById('BTN_TEST').addEventListener('click', button_test);
+  document.getElementById('BTN_LAUNCH').addEventListener('click', button_launch);
+  function init() {
+    Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+    Socket.onmessage = function(event) {
+      processCommand(event);
+    };
+  }
+  function button_initilize() {
+    var msg = {
+	button: 0,
+	servo1i: 90,
+	servo1f: 'servo1final',
+	servo2i: 'servo2start',
+	servo2f: 'servo2final'
+	};
+	Socket.send(JSON.stringify(msg));
+  }
+  function button_test() {
+    var msg = {
+	button: 1,
+	servo1i: 'servo1start',
+	servo1f: 180,
+	servo2i: 'servo2start',
+	servo2f: 'servo2final'
+	};
+	Socket.send(JSON.stringify(msg));
+  }
+  function button_launch() {
+    var msg = {
+	button: 2,
+	servo1i: 'servo1start',
+	servo1f: 'servo1final',
+	servo2i: 'servo2start',
+	servo2f: 'servo2final'
+	};
+	Socket.send(JSON.stringify(msg));
+  }
+  function processCommand(event) {
+	var obj = JSON.parse(event.data);
+	document.getElementById('altitude').innerHTML = obj.altitude;
+    console.log(obj.altitude);
+  }
+  window.onload = function(event) {
+    init();
+  }
+</script>
+</html>
