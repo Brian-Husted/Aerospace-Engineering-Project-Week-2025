@@ -51,30 +51,30 @@ Ready for Launch!
   function button_initilize() {
     var msg = {
 	button: 0,
-	servo1i: 90,
-	servo1f: 'servo1final',
-	servo2i: 'servo2start',
-	servo2f: 'servo2final'
+	servo1i: parseInt(document.getElementById('servo1start').value),
+	servo1f: parseInt(document.getElementById('servo1final').value),
+	servo2i: parseInt(document.getElementById('servo2start').value),
+	servo2f: parseInt(document.getElementById('servo2final').value)
 	};
 	Socket.send(JSON.stringify(msg));
   }
   function button_test() {
     var msg = {
 	button: 1,
-	servo1i: 'servo1start',
-	servo1f: 180,
-	servo2i: 'servo2start',
-	servo2f: 'servo2final'
+	servo1i: parseInt(document.getElementById('servo1start').value),
+	servo1f: parseInt(document.getElementById('servo1final').value),
+	servo2i: parseInt(document.getElementById('servo2start').value),
+	servo2f: parseInt(document.getElementById('servo2final').value)
 	};
 	Socket.send(JSON.stringify(msg));
   }
   function button_launch() {
     var msg = {
 	button: 2,
-	servo1i: 'servo1start',
-	servo1f: 'servo1final',
-	servo2i: 'servo2start',
-	servo2f: 'servo2final'
+	servo1i: parseInt(document.getElementById('servo1start').value),
+	servo1f: parseInt(document.getElementById('servo1final').value),
+	servo2i: parseInt(document.getElementById('servo2start').value),
+	servo2f: parseInt(document.getElementById('servo2final').value)
 	};
 	Socket.send(JSON.stringify(msg));
   }
