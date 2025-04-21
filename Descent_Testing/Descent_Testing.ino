@@ -27,6 +27,7 @@ const char *password = "";
 
 int startPos1, startPos2;
 int relPos1, relPos2;
+int button;
 bool launch = false;
 
 // The String below "webpage" contains the complete HTML code that is sent to the client whenever someone connects to the webserver
@@ -72,12 +73,21 @@ void loop() {
 	az = xyz[2];
 
   float totalAccel = abs(ax + ay + az);
-  // if ((millis() - timer) >= 100){
-  //   Serial.println(totalAccel);
-  //   timer = millis();
-  // }
 
-  if (launch && totalAccel < 0.01){
+  if (button == 0){  //set servos to starting positions
+    servo_1.write(startPos1);
+    servo_2.write(startPos2);
+  }
+  else if (button == 1){  //set servos to release positions
+    servo_1.write(relPos1);
+    servo_2.write(relPos2);
+  }
+  else if (button == 2){  //
+    servo_1.write(startPos1);
+    servo_2.write(startPos2);
+  }
+
+  if (launch && totalAccel < 0.01){  //freefall detected
     //turn on LEDs
     digitalWrite(INT_LED, HIGH);
     digitalWrite(EXT_LED, HIGH);
@@ -87,17 +97,24 @@ void loop() {
     servo_1.write(relPos1);
     servo_2.write(relPos2);
 
-    delay(6000);
+    //wait 6 seconds
+    delay(6000);  
 
     //turn off buzzer
     noTone(BUZZER);
     launch = false;
 
   }
-  else if (launch){
-    //blink LED
+  else if (launch){ //waiting to be released
+    //blink LEDs
     digitalWrite(EXT_LED, millis() % 1000 < 50 ? HIGH : LOW);
     digitalWrite(INT_LED, millis() % 1000 < 50 ? HIGH : LOW);
+
+    //print data every 100ms
+    if ((millis() - timer) >= 100){
+      Serial.println(totalAccel, 3);
+      timer = millis();
+    }
   }
   else{
     //turn off LEDs
@@ -126,7 +143,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       }
       else {
         //move values from JSON string to variables
-        int button = doc["button"];
+        button = doc["button"];
         startPos1 = doc["servo1i"];
         relPos1 = doc["servo1f"];
         startPos2 = doc["servo2i"];
@@ -157,17 +174,6 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
         else if (relPos2 < 0){
           relPos2 = 0;
         }
-        
-        //print values
-        Serial.print(button);
-        Serial.print("\t");
-        Serial.print(startPos1);
-        Serial.print("\t");
-        Serial.print(relPos1);
-        Serial.print("\t");
-        Serial.print(startPos2);
-        Serial.print("\t");
-        Serial.println(relPos2);
 
         if (button == 0){  //set servos to starting positions
           servo_1.write(startPos1);
@@ -184,6 +190,16 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
           servo_2.write(startPos2);
           launch = true;
         }
+        //print values
+        Serial.print(button);
+        Serial.print("\t");
+        Serial.print(startPos1);
+        Serial.print("\t");
+        Serial.print(relPos1);
+        Serial.print("\t");
+        Serial.print(startPos2);
+        Serial.print("\t");
+        Serial.println(relPos2);
       }
       break;
   }
@@ -261,8 +277,8 @@ void init_servos(){  //attach and initilize servos
   servo_2.attach(SERVO_2, 650, 2600);
 
   //initialize servos to starting positions
-  servo_1.write(startPos1);  
-  servo_2.write(startPos2);
+  servo_1.write(90);  
+  servo_2.write(90);
   delay(1000);
 
   //notify the serial monitor
