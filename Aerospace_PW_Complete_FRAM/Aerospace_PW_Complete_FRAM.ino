@@ -148,4 +148,29 @@ void loop() {
       Serial.println("Touchdown");
 
       //power off camera
-      cam_off
+      cam_off();
+
+      //write FRAM data to SD card
+      eof = getEof();
+      log_SD(eof);
+
+      //flash LED and play sound to aid recovery
+      while (1){
+        digitalWrite(INT_LED, millis() % 500 < 50 ? HIGH : LOW);
+        digitalWrite(EXT_LED, millis() % 500 < 50 ? HIGH : LOW);
+
+        if (millis() % 500 < 50){
+          tone(BUZZER, 1500, 500);
+        }
+        else {
+          noTone(BUZZER);
+        }
+      }
+      break;
+  }
+}
+
+
+
+
+
