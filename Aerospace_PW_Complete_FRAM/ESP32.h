@@ -29,7 +29,7 @@ FRAM_CS 25
 
 //define parameters for launch/recovery
 #define launch_accel 10 //acceleration in m/s/s to detect launch
-#define launch_alt 20  //altitude in meters for fail safe detection of launch
+#define launch_alt 15  //altitude in meters for fail safe detection of launch
 
 float basePressure; // baseline pressure (Pa) at the launchpad
 float altitude;  //calculated and filtered altitude above launchpad in meters

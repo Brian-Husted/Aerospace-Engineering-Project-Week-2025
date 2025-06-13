@@ -124,7 +124,7 @@ void loop() {
 
     case 1:  //rocket is ascending
       //check if apogee reached
-      if (vertVel <= 0.5){
+      if (altitude >= launch_alt && vertVel <= 0.5){
         //release parachute
         servo_1.write(relPos1);
         servo_2.write(relPos2);

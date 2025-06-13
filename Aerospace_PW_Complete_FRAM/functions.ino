@@ -151,6 +151,10 @@ void init_accel(){  //initilize the accelerometer
   Serial.print("Calibrating accelerometer...");
   SerialBT.print("Calibrating accelerometer...");
 
+  //set the range to +/- 16g at full resolution
+  adxl.setRangeSetting(16);
+  adxl.setFullResBit(1);
+  
   //set activity/ inactivity thresholds (0-255)
   adxl.setActivityThreshold(75); //62.5mg per increment
   adxl.setInactivityThreshold(75); //62.5mg per increment
