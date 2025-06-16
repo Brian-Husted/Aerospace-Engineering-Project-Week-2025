@@ -87,11 +87,12 @@ void loop() {
 	accelZ = xyz[2] * 9.8 - Zoffset;  
 
   //get new pressure reading from altimeter and filter data
-  altitude = pressureKalmanFilter.updateEstimate(44330 * (1.0 - pow(bmp280.getPressure() / basePressure, 0.1903)));
+  pressure = float(bmp280.getPressure());
+  altitude = pressureKalmanFilter.updateEstimate(44330 * (1.0 - pow(pressure / basePressure, 0.1903)));
 
   //calculate time since last loop and vertical velocity
   float loop_time = (millis() - lastTime) * 0.001;  //time for each loop in seconds
-  float vertVel = (altitude - last_altitude) / loop_time;  //vertical velocity based on altitude m/s
+  vertVel = (altitude - last_altitude) / loop_time;
 
   last_altitude = altitude;  //update previous altitude
   lastTime = millis();  //update loop timer
@@ -99,9 +100,9 @@ void loop() {
   //calculate running average altitude
   avg_altitude = 0.99 * avg_altitude + 0.01 * altitude;
   
-  //send new data to the log every 100ms
-  if ((millis() - dataTimer) >= 100){
-    telemetry();  //default is: time, state, altitude, and accelX
+  //send new data to the log every 50ms
+  if ((millis() - dataTimer) >= 50){
+    telemetry();  //default is: time, state, pressure altitude, velocity, and accelX
     dataTimer = millis();
   }
   
@@ -124,7 +125,7 @@ void loop() {
 
     case 1:  //rocket is ascending
       //check if apogee reached
-      if (altitude >= launch_alt && vertVel <= 0.5){
+      if (altitude >= launch_alt && vertVel <= 0.5f){
         //release parachute
         servo_1.write(relPos1);
         servo_2.write(relPos2);
@@ -138,7 +139,7 @@ void loop() {
       camera();  //capture pictures every 3 seconds
 
       //check if current altitude is close to running average
-      if (abs(avg_altitude - altitude) < 0.1){
+      if ((avg_altitude - altitude) < 0.1f){
         state ++;  //advance to the ground state
       }
       break;

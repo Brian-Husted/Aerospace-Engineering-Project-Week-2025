@@ -31,8 +31,10 @@ FRAM_CS 25
 #define launch_accel 10 //acceleration in m/s/s to detect launch
 #define launch_alt 15  //altitude in meters for fail safe detection of launch
 
+float pressure;  //current pressure reading
 float basePressure; // baseline pressure (Pa) at the launchpad
 float altitude;  //calculated and filtered altitude above launchpad in meters
+float vertVel;  //calculated vertical velocity from altitude in m/s
 float last_altitude;  //store previous altitude reading for apogee detection
 float avg_altitude;  //running average altitude for landing detection
 
@@ -46,7 +48,7 @@ const char file_ext[5] = ".csv";  //file extension string
 uint32_t addr; //memory address for FRAM
 uint32_t eof;  //memory address for the end of log file
 
-byte state = 0;  //tracks state of rocket launch
+int state = 0;  //tracks state of rocket launch
 unsigned long dataTimer, camTimer, shutterTimer, lastTime; 
 bool shutter;  //true when image capture is active
 

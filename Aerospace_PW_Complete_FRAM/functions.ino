@@ -38,7 +38,7 @@ void init_SD() {  //initialze the SD card and set log file name
   //check if the file is open
   if (dataFile) {
     //print the headers for the file
-    dataFile.println("time,state,altitude,acceleration");  
+    dataFile.println("time,state,pressure,altitude,velocity,acceleration");  
     dataFile.close();
   }
 
@@ -154,7 +154,7 @@ void init_accel(){  //initilize the accelerometer
   //set the range to +/- 16g at full resolution
   adxl.setRangeSetting(16);
   adxl.setFullResBit(1);
-  
+
   //set activity/ inactivity thresholds (0-255)
   adxl.setActivityThreshold(75); //62.5mg per increment
   adxl.setInactivityThreshold(75); //62.5mg per increment
@@ -289,34 +289,37 @@ void init_camera(){  //initialize the camera
 }
 
 void telemetry(){  //log flight data to FRAM
-  float t = (millis() - start) / 1000;  //current time from end of setup/callibration
+  float t = (millis() - start) * 0.001;  //current time from end of setup/callibration
   uint8_t buffer[4];  //4 byte buffer for floats
 
   //write the current time to FRAM
   memcpy(buffer, (void *)&t, 4); 
   fram.write(addr, buffer, 4);
-  Serial.print(t);
   addr = addr + 4;
 
   //write the state to FRAM
   memcpy(buffer, (void *)&state, 4); 
   fram.write(addr, buffer, 4);
-  Serial.print("\t");
-  Serial.print(state);
+  addr = addr + 4;
+
+  //write pressure to FRAM
+  memcpy(buffer, (void *)&pressure, 4); 
+  fram.write(addr, buffer, 4);
   addr = addr + 4;
 
   //write the altitude to FRAM
   memcpy(buffer, (void *)&altitude, 4); 
   fram.write(addr, buffer, 4);
-  Serial.print("\t");
-  Serial.print(altitude);
+  addr = addr + 4;
+
+  //write the vertical velocity to FRAM
+  memcpy(buffer, (void *)&vertVel, 4); 
+  fram.write(addr, buffer, 4);
   addr = addr + 4;
   
   //write the acceleration to FRAM
   memcpy(buffer, (void *)&accelX, 4); 
   fram.write(addr, buffer, 4);
-  Serial.print("\t");
-  Serial.println(accelX);
   addr = addr + 4;
 
   //write EOF location
@@ -327,11 +330,13 @@ void telemetry(){  //log flight data to FRAM
     String data = "";
 
     data += String(t, 3);  //time (seconds) with 3 decimals
-    data += "/t";
+    data += "\t";
     data += String(state);  //rocket state
-    data += "/t";
+    data += "\t";
     data += String(altitude, 2);  //altitude (meters) with 2 decimals 
-    data += "/t";
+    data += "\t";
+    data += String(vertVel, 2);  //vertical velocity (m/s) with 2 decimals
+    data += "\t";
     data += String(accelX, 2);  //acceleration (m/s/s) with 2 decimals
 
     Serial.println(data); 
@@ -372,7 +377,21 @@ void log_SD(uint32_t eof){
     dataString += ",";
     addr = addr + 4;  //next 4 bytes
 
+    //read pressure data to send to SD log
+    fram.read(addr, buffer, 4);
+    memcpy((void *)&value, buffer, 4);
+    dataString += String(value, 4);
+    dataString += ",";
+    addr = addr + 4;  //next 4 bytes
+
     //read altitude data to send to SD log
+    fram.read(addr, buffer, 4);
+    memcpy((void *)&value, buffer, 4);
+    dataString += String(value, 4);
+    dataString += ",";
+    addr = addr + 4;  //next 4 bytes
+
+    //read velocity data to send to SD log
     fram.read(addr, buffer, 4);
     memcpy((void *)&value, buffer, 4);
     dataString += String(value, 4);
